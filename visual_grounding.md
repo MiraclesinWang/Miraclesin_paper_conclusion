@@ -23,7 +23,7 @@
 
 上面是传统的方法，下面的是作者的方法
 
-代码：[![img](https://github.com/fluidicon.png)GitHub - ChopinSharp/ref-nms: Official codebase for "Ref-NMS: Breaking Proposal Bottlenecks in Two-Stage Referring Expression Grounding"](https://github.com/ChopinSharp/ref-nms)
+代码：[GitHub - ChopinSharp/ref-nms: Official codebase for "Ref-NMS: Breaking Proposal Bottlenecks in Two-Stage Referring Expression Grounding"](https://github.com/ChopinSharp/ref-nms)
 
 一点细节：
 
@@ -46,7 +46,7 @@
 
 核心思想：方向是弱监督的grounding，实现方式是从输入的句子中提取若干个三元组<主体对象，关系，修饰对象>，例如<man, holding, plate>，主要过程分为：三元组生成->bbox特征+位置特征提取->匹配相似度计算->三元组重建（据说重建是该领域的传统方法）
 
-代码：[![img](https://github.com/fluidicon.png)GitHub - insomnia94/DTWREG: Preliminary code for reviewers](https://github.com/insomnia94/DTWREG) 
+代码：[GitHub - insomnia94/DTWREG: Preliminary code for reviewers](https://github.com/insomnia94/DTWREG) 
 
 一点细节：
 
@@ -84,7 +84,7 @@
 
 核心思想：主要应对的问题是弱监督的grounding。如标题所说，主要的方法是对比学习。这里对比学习生成正负样本的方法我觉得还是挺有意思的。
 
-代码：[![img](https://github.com/fluidicon.png)GitHub - BigRedT/info-ground: Learning phrase grounding from captioned images through InfoNCE bound on mutual information](https://github.com/BigRedT/info-ground) 
+代码：[GitHub - BigRedT/info-ground: Learning phrase grounding from captioned images through InfoNCE bound on mutual information](https://github.com/BigRedT/info-ground) 
 
 一些细节：
 
@@ -139,7 +139,7 @@
 
 核心思想：这个工作对文本和图像都建了个图，把两边的数据都结构化，最后做成一个图上点的匹配问题。对于图像建立场景图，图的节点表示各个局部对象，图的有向边表示关系（和知识图谱类似）；文本则建立语法图，节点表示名词短语，边表示介词。
 
-代码：[![img](https://github.com/fluidicon.png)GitHub - sibeiyang/sgmn: Graph-Structured Referring Expressions Reasoning in The Wild, In CVPR 2020, Oral.](https://github.com/sibeiyang/sgmn) 
+代码：[GitHub - sibeiyang/sgmn: Graph-Structured Referring Expressions Reasoning in The Wild, In CVPR 2020, Oral.](https://github.com/sibeiyang/sgmn) 
 
 具体细节：
 
