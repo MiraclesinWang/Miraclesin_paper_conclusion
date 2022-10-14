@@ -44,7 +44,7 @@ xxxx
    
    
    
-   2. **2023-NeurIPS-Egocentric Video-Language Pretraining**
+2. **2023-NeurIPS-Egocentric Video-Language Pretraining**
    
       <font color='vornblue'>核心思想：</font>
    
