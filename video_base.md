@@ -54,14 +54,19 @@ xxxx
    
       1. *层级点积注意力*：和思路2,3类似，不过这次是在attention的计算公式上入手，同一个特征有两种映射方式，分别是$K_s,V_s\in\mathbb{R}^{n_h\cdot n_w\times d}$和$K_t, V_t\in \mathbb{R}^{n_t\times d}$，对于一半的头，采用前一种计算方式，即$Y_s=Attention(Q, K_s, V_s)$，对于剩下的头，则采取后一种计算方式$Y_t=Attention(Q, K_t, V_t)$。最终将两种输出拼接起来，即$Y=Concat(Y_s, Y_t)\cdot W_o$。
    
+      1. 从实验结果上来看，前两种模型效果整体较好，后两种模型则相对较差。但是参数量则是1、4模型较少，2、3相对较多，而处理宿舍则是1>3>2>4。
+   
    1. 作者想要像ViT一样利用大量数据训练自己的模型，但是视频数据集目前还达不到那么大的规模，于是作者想要利用ViT的参数来初始化自己的模型。每个模型的初始化策略有所区别：
    
       1. positional embedding：考虑到视频模型除了空间关系外还有时序关系，不同帧的positional embedding未必需要相同，作者将每个帧的positional embedding先都加载为ViT的参数，后续各自训练。
-      1. 三维卷积embedding权重：tubelet embedding需要对三维而不是二维的像素进行embedding，一个比较直观的解决方法是将patch内所有帧二维映射后求平均。作者还提供了一种替代思路："central frame initialisation"，即初始化只取一个卷积核$\frac{t}{2}$的帧的二维embedding，剩下的全部置零，用公式表示即为$E=[0,...,E_{central},...,0]$，初始时和上文的"Uniform frame sampling"类似，在训练过程中让模型自己调整$E$。（有个问题，既然你其他地方都置零了，那神经元后面训练不就无法激活了？何谈调整？）
+      1. 三维卷积embedding权重：tubelet embedding需要对三维而不是二维的像素进行embedding，一个比较直观的解决方法是将patch内所有帧二维映射后求平均。作者还提供了一种替代思路："central frame initialisation"，即初始化只取一个卷积核$\frac{t}{2}$的帧的二维embedding，剩下的全部置零，用公式表示即为$E=[0,...,E_{central},...,0]$，初始时和上文的"Uniform frame sampling"类似，在训练过程中让模型自己调整$E$。（有个问题，既然你其他地方都置零了，那神经元后面训练不就无法激活了？何谈调整？）（不过从实验结果上来看，这种方式还是最好的，在Kinetics上达到了79.2的Rank-1准确率）
    
+   1. 预测时模型输入是采样步长为2的32帧的clip，对于长视频，还会处理其不同的view（我的理解是取不同的clip）并将结果取均值作为最终结果。
    
-   <font color='vornblue'>顺便吐个槽：</font>
+   1. 作者使用了几种正则化方式，分别是：Kinetics 400初始化、随机深度（这个是啥？引用的论文Deep networks with stochastic depth）、随机数据增强、标签平滑（Rethinking the inception architecture for computer vision）、Mixup（Mixup: Beyond empirical risk minimization）。
    
-   <font color='vornblue'>启发：</font>
+   1. 作者还消融了tubelet的尺寸对准确率和运行速度的影响，在空间尺寸固定为$16\times 16$的情况下，时间尺寸从2提升到8，准确率和运行速度都在下降。这说明更小的tubelet效果更好。
+   
+   1. 如果增加输入模型的视频帧数，整体效果都会上升。但是增加在视频中采集的clip数，效果则会先增后降。而提升分辨率则会给准确率带来细微的提升，同时大幅降低处理速度。
    
    ![img](./video_base_assets/1.png)
