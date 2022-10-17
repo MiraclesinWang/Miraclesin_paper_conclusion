@@ -22,6 +22,8 @@ xxxx
 
 
 
+
+
 1. **2023-NeurIPS-VideoMAE: Masked Autoencoders are Data-Efficient Learners for Self-Supervised Video Pre-Training**
 
    <font color='vornblue'>核心思想：</font>
@@ -55,9 +57,9 @@ xxxx
       <font color='vornblue'>相关细节：</font>
    
       1. 现有视频-文本预训练数据集大致可以分为两类：第三人称视角视频数据集、第一人称视角视频数据集。这两类的主要数据集及其相关信息如表所示：
-   
+      
          ![img](./video_pretrain_assets/2-1.png)
-   
+      
       2. 作者提到HowTo100M里的文本标注是通过语音识别得到的，这导致整个数据集大部分的标注都存在缺陷。
       3. 鉴于Ego4d的文本采用的是时间戳标注，所以本文在构建数据集时提出了上下文变长clip匹配策略，具体来说，对于有n个时间戳$\{t_0, ...,t_{n-1}\}$且每个时间戳都有一个sentence表述$\mathcal{T}_i$。而对于$\mathcal{T}_i$，作者选取其对应clip的策略为$[t_i^{start},t_i^{end}]=[t_i-\beta_i/2\alpha, t_i+\beta_i/2\alpha]$。其中$\beta_i$是一个对每个视频不同的适应性参数，作者取了视频的时间戳平均距离，即$\frac{t_{n-1}-t_0}{n-1}$，而$\alpha$则是一个scale因子，作者选取了所有视频的$\beta_i$的均值(4.9秒)。作者使用消融实验证明了这两种设计是最好的。（**PS：在消融实验中，作者尝试了几种不同的预训练clip选择策略，从结果上来看，如果测试任务选取低难度任务，则几种方案差别不明显，而如果选取高难度任务，例如接下来提到的inter-video MCQ，作者的clip选择策略就有显著优势了**）
       4. 作者在预训练的模型结构上并无太大的创新，而是使用了一个经典的双编码器架构，即video编码器+text编码器，本文采用的是TimeSformer+DistillBERT。两个编码器可以被替换。
