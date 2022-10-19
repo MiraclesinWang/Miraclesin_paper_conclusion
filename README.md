@@ -7,4 +7,4 @@
 	- [ego video hand and objection](https://github.com/MiraclesinWang/Miraclesin_paper_conclusion/blob/main/ego_video_hand_and_objection%2Emd)
 - pretrain
 	- [video pretrain](https://github.com/MiraclesinWang/Miraclesin_paper_conclusion/blob/main/video_pretrain%2Emd)
-
+- [generation](https://github.com/MiraclesinWang/Miraclesin_paper_conclusion/blob/main/generation%2Emd)
