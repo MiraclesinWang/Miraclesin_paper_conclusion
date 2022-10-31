@@ -8,3 +8,4 @@
 - pretrain
 	- [video pretrain](https://github.com/MiraclesinWang/Miraclesin_paper_conclusion/blob/main/video_pretrain%2Emd)
 - [generation](https://github.com/MiraclesinWang/Miraclesin_paper_conclusion/blob/main/generation%2Emd)
+- [object detection](https://github.com/MiraclesinWang/Miraclesin_paper_conclusion/blob/main/object_detection.md)
