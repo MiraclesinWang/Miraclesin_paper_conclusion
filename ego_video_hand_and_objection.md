@@ -93,30 +93,32 @@ xxxx
 
 6. 讨论：作者也指出，本任务的关键是理解人手的活动和物体状态的关系，并且PNR及其后方的信息也是很重要的，例如“劈木头”这一动作，就需要结合PNR后的若干帧才能精准确认状态的变化。
 
-3. **2022-arXiv-Structured Video Tokens @ Ego4D PNR Temporal Localization Challenge 2022**
+7. **2022-arXiv-Structured Video Tokens @ Ego4D PNR Temporal Localization Challenge 2022**
+
+   **->2022-arXiv-Bringing Image Scene Structure to Video via Frame-Clip Consistency of Object Tokens**
 
    <font color='vornblue'>核心思想：</font>
 
-   提出了SViT模型，利用了一小部分图像的结构信息来提升视频模型性能。作者将图像和视频视作两个不同的模态，行文重心放在了利用图像来boost视频这件事上，利用了包括场景图在内的一系列技术。baseline选取了MViT。
+   提出了SViT模型，利用了一小部分图像的结构信息来提升视频模型性能。作者将图像和视频视作两个不同的模态，行文重心放在了利用图像来boost视频这件事上，利用了包括场景图在内的一系列技术。baseline选取了MViT。作者经过修改，目前已经达到了0.515的PNR错误率，是目前的新SOTA。
 
-   <font color='vornblue'>代码：</font>本身的代码尚未开源，但是baseline MViT的代码如下：[facebookresearch/mvit](https://github.com/facebookresearch/mvit)
+   <font color='vornblue'>代码：</font>本身的代码[elabd/SViT](https://eladb3.github.io/SViT/)，baseline MViT的代码如下：[facebookresearch/mvit](https://github.com/facebookresearch/mvit)
 
    <font color='vornblue'>相关细节：</font>
 
    1. 如上所说，作者的核心idea是如何通过图像来帮助视频理解，所以作者提出最直观的方法是让二者共享一个transformer模型，但是这种idea面临着两个问题：如何建模结构信息和如何处理domain gap。为此，作者提出了两个关键概念：一是目标token（从已学习embedding初始化而来的新token，作者也将其称为object prompts）用于捕捉视频/图像中的目标信息，<font color='red'>利用场景图来作为监督</font>；二是Frame-Clip一致性损失，该损失用于确保目标token在图像/视频中的一致性。
-   2. 场景图只在训练时使用，测试时不再使用。从作者给出的示意图来看，场景图里似乎bbox是有角度标注的，可以旋转。但是作者给的文字描述里确实说bbox是$\mathbb{R}^4$，很奇怪。每张图像有4个bbox，分别表示左手、右手、和左手互动的物体、和右手互动的物体。还有一个4维的01变量表示每个bbox是否存在。
+   2. 场景图只在训练时使用，测试时不再使用。从作者给出的示意图来看，场景图里似乎bbox是有角度标注的，可以旋转。但是作者给的文字描述里确实说bbox是$\mathbb{R}^4$，很奇怪。每张图像有4个bbox，分别表示左手、右手、和左手互动的物体、和右手互动的物体。还有一个4维的01变量表示每个bbox是否存在。另一方面，在手和物体之间建立有向边，有向边的值仅为1或0，表示手是否和物体有直接互动。
    3. 常规的video transformer做法是将视频编码为$T\times H\times W\times d$的张量，随后加上spatio-temporal position embedding，经过多层transformer编码后，进行平均池化得到全局特征。但是这么做的话无法同时适用于图像。于是作者提出使用目标token，假设每帧至多包含$n$个目标，则插入$n$个目标token，目标token的构建是$o_i+r_t$，其中前者是object prompt，后者是时序positional embedding，于是总计有$T\times H\times W+T\times n$个token一起输入transformer。
    4. 损失函数总共包含3项：
       1. Video Loss：二项交叉熵损失，意义没有明说，应该是PNR自带的任务损失
-      2. HAOG Loss：transformer输出每张图像的$n$个object token，在本文中，$n=4$。每个object token有个作用：预测bbox的坐标、预测bbox是否存在、预测手和对应物体的联系变量，分别用L1损失、二元交叉熵、交叉熵约束三个目标
-      3. Frame-Clip一致性损失：为了避免模型只优化图像，作者额外提出了本损失。该损失将视频用clip形式和$T$帧图像形式输入两次（从我对作者上文的理解，区别仅仅是少了一个temporal positional embedding），然后约束两次输入的object token的$L_1$损失尽可能小。
-   5. 作者训练时额外使用了100 Days of Hands数据集，但是作者在所有的消融实验里都没提到只用Ego4D pretrain的结果，感觉实验不是很可信。
+      2. HAOG Loss：transformer输出每张图像的$n$个object token，在本文中，$n=4$。每个object token有个作用：预测bbox的坐标、预测bbox是否存在、预测手和对应物体的联系变量，分别用L1损失+GIoU损失、二元交叉熵、交叉熵约束三个目标
+      3. Frame-Clip一致性损失：为了避免模型只优化图像，作者额外提出了本损失。该损失将视频用clip形式和$T$帧图像形式输入两次（从我对作者上文的理解，区别仅仅是少了一个temporal positional embedding），然后约束两次输入的object token的$L_1$损失尽可能小。也可以理解为该项损失是在拟合场景图中的边信息。
+   5. 作者训练时额外使用了100 Days of Hands数据集，但是作者在所有的消融实验里都没提到只用Ego4D pretrain的结果，感觉实验不是很可信。后来作者的论文经过一次大改版，预训练数据集改为K400，下游任务数据集增加到5个，并且模型主要做的任务也变成动作识别了。不过改版前后PNR效果分别为0.656和0.515，改版前没有classification的数据，改版后为74.1%，方法上感觉也没怎么大改，光是换个数据集能有这么大的提升吗？
    6. 作者提到了一个细节：作者尝试自己分析了一下自己的实验结果，成功的暂且不论，失败的大部分是预测的过早了，例如刚拿出刀靠近胡萝卜就被predict，而不是胡萝卜被切开的时候。
 
    <font color='vornblue'>启发：</font>
 
-   1. 本文写作毕竟是半成品，很多细节还缺漏。方法其实我不是很喜欢，一方面使用了额外的训练数据，另一方面还用了额外的特征图信息（而且数据集给出的标注应该是只有左右手、工具、交互物体的，不知道作者的场景图是哪来的，作者也没明说），再者将图像和视频的一致性感觉挺奇怪的，不知其义。
+   1. 本文方法其实我不是很喜欢，一方面使用了额外的训练数据，另一方面还用了额外的特征图信息，再者将图像和视频的一致性感觉挺奇怪的，不知其义。不过既然能SOTA，而且是在多个数据集上，那相比方法一定是capture了某个关键痛点。
    1. 上文提到的作者分析自己模型定位错误的帧普遍是预测早了，所以大胆预测其实作者的模型核心是学到了”手靠近物体的帧是PNR“，并没有学到真正物体变化的信息。
-   
+
    <img src=./ego_video_hand_and_objection_assets/3-1.png ></img>
 
