@@ -3,6 +3,8 @@
 | 1    | 2022-arXiv-ReLER@ZJU-Alibaba Submission to the Ego4D Natural Language Queries Challenge 2022 | 2022.10.17 |
 | 2    | 2022-arXiv-Ego4D: Around the World in 3,000 Hours of Egocentric Video | 2022.11.11 |
 | 3    | 2022-arXiv-Structured Video Tokens @ Ego4D PNR Temporal Localization Challenge 2022 | 2022.11.14 |
+| 4    | 2022-arXiv-Where a Strong Backbone Meets Strong Features – ActionFormer for Ego4D Moment Queries Challenge | 2022.11.23 |
+| 5    | 2022-ECCV-ActionFormer: Localizing Moments of Actions with Transformers | 2022.11.24 |
 |      |                                                              |            |
 
 template：
@@ -21,7 +23,7 @@ xxxx
 
 <font color='vornblue'>启发：</font>
 
-1. **2022-arXiv-ReLER@ZJU-Alibaba Submission to the Ego4D Natural Language Queries Challenge 2022**
+\1. **2022-arXiv-ReLER@ZJU-Alibaba Submission to the Ego4D Natural Language Queries Challenge 2022**
 
 <font color='vornblue'>核心思想：</font>
 
@@ -51,7 +53,7 @@ xxxx
 
 <img src="./ego_video_hand_and_objection_assets/1-1.png" style="zoom:50%" />
 
-2. **2022-arXiv-Ego4D: Around the World in 3,000 Hours of Egocentric Video**
+\2. **2022-arXiv-Ego4D: Around the World in 3,000 Hours of Egocentric Video**
 
 ​	<font color='vornblue'>相关细节：</font>
 
@@ -95,7 +97,8 @@ xxxx
 
    
 
-3. **2022-arXiv-Structured Video Tokens @ Ego4D PNR Temporal Localization Challenge 2022**
+
+\3. **2022-arXiv-Structured Video Tokens @ Ego4D PNR Temporal Localization Challenge 2022**
 
 ​	**->2022-arXiv-Bringing Image Scene Structure to Video via Frame-Clip Consistency of Object Tokens**
 
@@ -123,4 +126,31 @@ xxxx
 1. 上文提到的作者分析自己模型定位错误的帧普遍是预测早了，所以大胆预测其实作者的模型核心是学到了”手靠近物体的帧是PNR“，并没有学到真正物体变化的信息。
 
 <img src=./ego_video_hand_and_objection_assets/3-1.png ></img>
+
+\4. **2022-arXiv-Where a Strong Backbone Meets Strong Features – ActionFormer for Ego4D Moment Queries Challenge**
+
+<font color='vornblue'>核心思想：</font>
+
+纯trick堆叠的文章，技术意义实在有限，但是当做Ego4D的训练方法参考还是可以的。任务就是在视频中找到action的moment并分类。作者用了三个编码器得到的特征（Slowfast，Omnivore，EgoVLP），然后用三个线性层分别映射后拼接，然后用多尺度的自注意力层得到长度不同的候选区间，随后进行动作分类和有界回归（所谓有界回归，就是预测中心位置$c_s=s_x+w_a\cdot t_x$和时间长度$w=w_a\cdot exp(t_w)$，随后左右边界分别为$c_s-w/2,c_s+w/2$，对其进行裁剪确保其在视频长度范围内）。而且这篇文章自引还挺严重的，看参考文献里有好多末位作者本人的其他文章。
+
+<font color='vornblue'>代码：</font>[happyharrycn/actionformer](https://github.com/happyharrycn/actionformer_release)
+
+\5. **2022-ECCV-ActionFormer: Localizing Moments of Actions with Transformers**
+
+<font color='vornblue'>核心思想：</font>
+
+吴建鑫组的一篇论文。本文提出了一种时序动作定位网络，无需预先提出proposal或是anchor window（和单阶段的目标检测模型类似）。模型结构包含一个多尺度特征表示、一个局部自注意力机制和一个轻量化的解码器。模型的结构并不复杂，但是效果非常好，在多个数据集上大幅超越SOTA。
+
+<font color='vornblue'>代码：</font>[happyharrycn/actionformer](https://github.com/happyharrycn/actionformer_release)
+
+<font color='vornblue'>相关细节：</font>
+
+1. 本文将视频中每个时刻都当做是action candidate，每个candidate识别动作的类别、距离动作起止边界的时间三个数值。
+1. 文中提到：在transformer前加入卷积层对时序中的局部感知有帮助
+1. 作者的encoder保存了每一层transformer的输出，即$Z=\{Z^1, Z^2, ...,Z^L\}$。
+1. 、作者的分类头采用一维卷积，kernel size取3，保证可以获取左右信息。并且每一个尺度都进行分类，但是所有尺度的头共享参数。回归头设计理念一致，但是只对位于动作执行状态的时间步进行回归
+1. 作者用Focal loss度量分类能力，该损失适合度量负样本数比正样本多很多的情况。
+1. 作者说使用center sampling策略可以很有效地提升模型性能。具体来说，将ground truth中心点附近的帧视为正样本。详细细节先留空，确认使用再来检查。
+
+<img src=./ego_video_hand_and_objection_assets/4-1.png ></img>
 
