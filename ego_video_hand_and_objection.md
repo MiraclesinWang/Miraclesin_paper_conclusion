@@ -5,6 +5,7 @@
 | 3    | 2022-arXiv-Structured Video Tokens @ Ego4D PNR Temporal Localization Challenge 2022 | 2022.11.14 |
 | 4    | 2022-arXiv-Where a Strong Backbone Meets Strong Features – ActionFormer for Ego4D Moment Queries Challenge | 2022.11.23 |
 | 5    | 2022-ECCV-ActionFormer: Localizing Moments of Actions with Transformers | 2022.11.24 |
+| 6    | 2021-CVPR-Learning salient boundary feature for anchor-free temporal action localization | 2022.11.28 |
 |      |                                                              |            |
 
 template：
@@ -151,6 +152,29 @@ xxxx
 1. 、作者的分类头采用一维卷积，kernel size取3，保证可以获取左右信息。并且每一个尺度都进行分类，但是所有尺度的头共享参数。回归头设计理念一致，但是只对位于动作执行状态的时间步进行回归
 1. 作者用Focal loss度量分类能力，该损失适合度量负样本数比正样本多很多的情况。
 1. 作者说使用center sampling策略可以很有效地提升模型性能。具体来说，将ground truth中心点附近的帧视为正样本。详细细节先留空，确认使用再来检查。
+1. 作者使用的视频特征由预训练的I3D模型进行提取。
 
 <img src=./ego_video_hand_and_objection_assets/4-1.png ></img>
 
+\5.   **2021-CVPR-Learning salient boundary feature for anchor-free temporal action localization**
+
+<font color='vornblue'>核心思想：</font>
+
+作者说是首篇完全anchor free的action recognition论文。以往的工作普遍预测anchor对ground truth的偏差，和目标检测十分类似。正如ActionFormer总结的一样，这篇论文有了单阶段的想法，但是由于种种限制仍然使用了proposal等双阶段理念，很可能是因为效果实在调不上去了。总得来说，一些理念可以看看，但是整体上基本是一团浆糊，缺乏清晰的逻辑导向。
+
+<font color='vornblue'>代码：</font>[TencentYoutuResearch/ActionDetection-AFSD](https://github.com/TencentYoutuResearch/ActionDetection-AFSD)
+
+<font color='vornblue'>相关细节：</font>
+
+	1. backbone使用I3D编码视频。
+	2. 模型是from-coarse-to-fine的，首先进行coarse的预测，在此基础上精炼。coarse预测阶段仅对处于action范围内的时间步进行优化，用时序卷积获得动作始末的初步估计。该估计将在接下来用于fine预测的proposal。
+	3. 这篇论文也用了多尺度的思想，多尺度这么好用的吗？并且多尺度输出预测值过程中同样使用了时序卷积。特别地，预测时输出的是每个时间步距离事件起点和终点的距离。并且两个预测使用不同的卷积，分别得到特征$f^s$和$f^e$。
+	4. 多尺度预测时对尺度$l$中每个时间步$k$的预测先进行聚合，对特征进行最大池化，即每个维度都取所有特征对应维度的最大值，得到$\hat{f}^s, \hat{f}^e$。此过程中为了照顾时序较少的底层，特别对其进行了上采样，得到$\tilde{f}^s, \tilde{f}^e$。
+	5. 作者对$f^s,f^e$进行了$tanh(\cdot)$与在时序上求平均操作，得到了开始与结束时刻出现的置信度$g^s,g^e\in \mathbb{R}^T$。作者为$g$给出的ground truth为该时间步是否在实际开始/结束时刻的近邻范围内。用BCE损失约束。
+	6. 作者还对边界进行了对比学习，具体来说，将一个完整的动作$A$分割为两个动作$A_1,A_2$，并在中间插入一些背景帧$B$（即没有action）。对于这三个部分的关系，作者是这么说的：原则上来说应该让$f^e_{A_1}$和$f^s_{A_2}$仅可能接近，且分别和$f^s_{B},f^e_{B}$远；但是模型对背景的敏感度增加时这种性质就不成立，此时模型会约束$f^e_{A_1},f^s_{B}$和$f^s_{A_2},f^e_{B}$尽可能接近，即首位相连。于是作者采用三元损失$L=max(\Vert f^e_{A_1}-f^s_{A_2}\Vert-\Vert f^e_{A_1}-f^s_{B}\Vert+1, 0)$来约束。
+
+<font color='vornblue'>顺便吐个槽：</font>
+
+1. 方法本身比较杂，有点堆砌和乱试的意思在里面。加上写作时的逻辑组织很混乱，整篇文章很多细节非常难懂。
+
+<img src=./ego_video_hand_and_objection_assets/5-1.png ></img>
